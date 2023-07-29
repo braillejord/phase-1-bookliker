@@ -3,24 +3,41 @@ const bookUrl = 'http://localhost:3000/books'
 const bookList = document.getElementById('list')
 const bookDetailPanel = document.getElementById('show-panel')
 
+// call fetch function
+fetchBookData()
+
 // fetch list of books
-fetch(bookUrl)
-    .then(r => r.json())
-    .then(data => renderBooks(data))
+function fetchBookData() {
+    fetch(bookUrl)
+        .then(r => r.json())
+        .then(data => renderBooks(data))
+}
+
 
 // render book list
 function renderBooks(allBooks) {
     allBooks.forEach((singleBook) => {
         const bookListItem = document.createElement('li')
         bookListItem.innerText = singleBook.title
-        bookListItem.onclick = () => showDetails(singleBook)
-
+        bookListItem.onclick = () => refetchBook(singleBook.id)
+        
         bookList.appendChild(bookListItem)
     })
 }
 
+// re-fetch book, in case users have updated
+function refetchBook(bookId) {
+    fetch(bookUrl + '/' + bookId)
+    .then(r => r.json())
+    .then(bookData => showDetails(bookData))
+}
+
+const bookLikers = document.createElement('ul')
+
 // show details of book on click
 function showDetails(singleBook) {
+    bookDetailPanel.innerText = ''
+
     const bookTitle = document.createElement('h2')
     bookTitle.innerText = singleBook.title
 
@@ -36,7 +53,8 @@ function showDetails(singleBook) {
     const bookDescription = document.createElement('p')
     bookDescription.innerText = singleBook.description
 
-    const bookLikers = document.createElement('ul')
+    bookLikers.innerText = ''
+    bookLikers.setAttribute('id', 'book-liker-list')
 
     singleBook.users.forEach((user) => {
         const bookLiker = document.createElement('li')
@@ -47,12 +65,13 @@ function showDetails(singleBook) {
         likeBtn.innerText = 'LIKE 👍'
         likeBtn.onclick = () => likeBook(singleBook)
 
-        bookDetailPanel.innerText = ""
+        bookDetailPanel.innerText = ''
         bookDetailPanel.append(bookTitle, bookImage, bookAuthor, bookSubtitle, bookDescription, bookLikers, likeBtn)
     })
 }
 
 // like a book and update in server
+// add new user to "like list"
 function likeBook(singleBook) {
     const newUserData = { id: 55, username: 'braillejord' }
     const updatedUserObject = [...singleBook.users, newUserData]
@@ -67,4 +86,8 @@ function likeBook(singleBook) {
             users: updatedUserObject
         })
     })
+    const newUser = document.createElement('li')
+    newUser.innerText = newUserData.username
+
+    bookLikers.appendChild(newUser)
 }
