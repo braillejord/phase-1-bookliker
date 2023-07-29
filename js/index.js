@@ -60,17 +60,23 @@ function showDetails(singleBook) {
         const bookLiker = document.createElement('li')
         bookLiker.innerText = user.username
         bookLikers.appendChild(bookLiker)
-
-        const likeBtn = document.createElement('button')
-        likeBtn.innerText = 'LIKE 👍'
-        likeBtn.onclick = () => likeBook(singleBook)
-
-        bookDetailPanel.innerText = ''
-        bookDetailPanel.append(bookTitle, bookImage, bookAuthor, bookSubtitle, bookDescription, bookLikers, likeBtn)
     })
+
+    const likeBtn = document.createElement('button')
+    likeBtn.innerText = singleBook.users.findIndex(user => user.id === 55) > -1 ? 'UNLIKE 👎' : 'LIKE 👍'
+    likeBtn.onclick = () => {
+        if (likeBtn.innerText === 'LIKE 👍') {
+            likeBook(singleBook)
+        } else {
+            unlikeBook(singleBook)
+        }
+    }
+
+    bookDetailPanel.innerText = ''
+    bookDetailPanel.append(bookTitle, bookImage, bookAuthor, bookSubtitle, bookDescription, bookLikers, likeBtn)
 }
 
-// like a book and update in server
+// like a book and update in database
 // add new user to "like list"
 function likeBook(singleBook) {
     const newUserData = { id: 55, username: 'braillejord' }
@@ -86,8 +92,44 @@ function likeBook(singleBook) {
             users: updatedUserObject
         })
     })
-    const newUser = document.createElement('li')
-    newUser.innerText = newUserData.username
+        .then(() => refetchBook(singleBook.id))
+}
 
-    bookLikers.appendChild(newUser)
+// unlike a book and update database
+function unlikeBook(singleBook) {
+    console.log(singleBook.users)
+    // this tells you where that user is in the array
+    const userIndex = singleBook.users.findIndex((user) => user.username === 'braillejord')
+
+    singleBook.users.splice(userIndex, 1)
+    console.log(singleBook.users)
+
+    fetch(bookUrl + '/' + singleBook.id, {
+        method: 'PATCH',
+        headers: {
+            'content-type': 'application/json',
+            'accepts': 'application/json'
+        },
+        body: JSON.stringify({
+            users: singleBook.users
+        })
+    })
+        .then(() => refetchBook(singleBook.id))
+}
+
+
+
+
+
+
+
+
+// notes for how .findIndex() works
+const users = [{ name: 'Riley', stats: 1000 }, { name: 'BreElle', stats: 9000 }]
+
+//if none found, it gives back -1. If it finds my user, it gives their index in the array. So this would give back 0
+const foundUser = users.findIndex(user => user.name === 'Riley')
+
+function findUser(user) {
+    //    if user.name === 'Riley', return where that is
 }
