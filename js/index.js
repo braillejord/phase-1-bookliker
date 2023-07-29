@@ -42,8 +42,29 @@ function showDetails(singleBook) {
         const bookLiker = document.createElement('li')
         bookLiker.innerText = user.username
         bookLikers.appendChild(bookLiker)
-    })
 
-    bookDetailPanel.innerText = ""
-    bookDetailPanel.append(bookTitle, bookImage, bookAuthor, bookSubtitle, bookDescription, bookLikers)
+        const likeBtn = document.createElement('button')
+        likeBtn.innerText = 'LIKE 👍'
+        likeBtn.onclick = () => likeBook(singleBook)
+
+        bookDetailPanel.innerText = ""
+        bookDetailPanel.append(bookTitle, bookImage, bookAuthor, bookSubtitle, bookDescription, bookLikers, likeBtn)
+    })
+}
+
+// like a book and update in server
+function likeBook(singleBook) {
+    const newUserData = { id: 55, username: 'braillejord' }
+    const updatedUserObject = [...singleBook.users, newUserData]
+
+    fetch(bookUrl + '/' + singleBook.id, {
+        method: 'PATCH',
+        headers: {
+            'content-type': 'application/json',
+            'accepts': 'application/json'
+        },
+        body: JSON.stringify({
+            users: updatedUserObject
+        })
+    })
 }
